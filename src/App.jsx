@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, MotionConfig, useReducedMotion, useScroll, useSpring } from 'framer-motion';
+import { AmbientScene, OpeningSequence, RotatingRole } from './components/MotionEffects';
 
 function ProjectImage({ project, className }) {
   const [failed, setFailed] = useState(false);
@@ -11,6 +12,19 @@ function ProjectImage({ project, className }) {
 }
 
 export default function App() {
+  const reducedMotion = useReducedMotion();
+  const [introComplete, setIntroComplete] = useState(() =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches || Boolean(window.location.hash),
+  );
+  const { scrollYProgress } = useScroll();
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 160, damping: 30 });
+
+  useEffect(() => {
+    if (introComplete) return;
+    const timer = window.setTimeout(() => setIntroComplete(true), 1400);
+    return () => window.clearTimeout(timer);
+  }, [introComplete]);
+
   const [activeSection, setActiveSection] = useState('home');
   const [formStatus, setFormStatus] = useState('');
   const [selectedProject, setSelectedProject] = useState(null);
@@ -71,16 +85,27 @@ export default function App() {
   };
 
   const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+    hidden: { opacity: 0, y: reducedMotion ? 0 : 28, filter: reducedMotion ? 'none' : 'blur(5px)' },
+    visible: {
+      opacity: 1, y: 0, filter: 'blur(0px)',
+      transition: { duration: reducedMotion ? 0 : 0.7, ease: [0.22, 1, 0.36, 1] },
+    },
   };
 
 
   return (
-    <div className="portfolio-site text-slate-100 font-sans min-h-screen selection:bg-blue-500 selection:text-white overflow-x-hidden relative">
+    <MotionConfig reducedMotion="user">
+    <div className={'portfolio-site text-slate-100 font-sans min-h-screen selection:bg-blue-500 selection:text-white overflow-x-hidden relative ' + (introComplete ? 'is-ready' : 'is-opening')}>
+      <OpeningSequence complete={introComplete} />
+      <AmbientScene />
+      <motion.div className="reading-progress" aria-hidden="true"
+        style={{ scaleX: reducedMotion ? scrollYProgress : smoothProgress }} />
 
       {/* NAVIGATION */}
-      <header className="site-header">
+      <motion.header className="site-header" style={{ x: '-50%' }}
+        initial={reducedMotion ? false : { opacity: 0, y: -15 }}
+        animate={introComplete ? { opacity: 1, y: 0 } : { opacity: 0, y: -15 }}
+        transition={{ duration: 0.65, delay: 0.15 }}>
         <a href="#home" className="site-logo" aria-label="Aditya, kembali ke beranda">
           <span aria-hidden="true">&lt;/&gt;</span> Aditya<span className="logo-dot">.</span>
         </a>
@@ -90,8 +115,11 @@ export default function App() {
             const isActive = activeSection === sectionId ||
               (sectionId === 'about' && ['education', 'skills', 'experience'].includes(activeSection));
             return (
-              <a key={item} href={'#' + sectionId} aria-current={isActive ? 'location' : undefined}>
-                {item}
+              <a key={item} href={'#' + sectionId} aria-current={isActive ? 'location' : undefined}
+                onClick={() => setActiveSection(sectionId)}>
+                {isActive && <motion.span className="nav-active" layoutId="navigation-pill"
+                  transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
+                <span className="nav-label">{item}</span>
               </a>
             );
           })}
@@ -100,14 +128,14 @@ export default function App() {
           target="_blank" rel="noreferrer" aria-label="GitHub Aditya">
           <i className="fa-brands fa-github" aria-hidden="true" />
         </a>
-      </header>
+      </motion.header>
 
       {/* HERO */}
       <section id="home" className="reference-hero">
-        <motion.div className="hero-intro" initial="hidden" animate="visible" variants={fadeInUp}>
+        <motion.div className="hero-intro" initial="hidden" animate={introComplete ? 'visible' : 'hidden'} variants={fadeInUp}>
           <p className="hero-greeting">Hi, I'm</p>
-          <h1>Aditya<br />Nur Arif<span>.</span></h1>
-          <p className="hero-profession">Web Developer &amp; UI/UX Designer</p>
+          <h1><span className="name-line">Aditya</span><span className="name-line">Nur Arif<span className="name-period">.</span></span></h1>
+          <RotatingRole enabled={introComplete} reducedMotion={reducedMotion} />
           <a href="/cv_aditya.pdf" download="CV_Aditya_Nur_Arif.pdf" className="blue-button">
             <i className="fa-regular fa-file-lines" aria-hidden="true" /> View CV
           </a>
@@ -121,22 +149,25 @@ export default function App() {
           </div>
         </motion.div>
 
-        <motion.div className="hero-photo" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}>
+        <motion.div className="hero-photo"
+          initial={reducedMotion ? false : { opacity: 0, y: 35, scale: 0.96 }}
+          animate={introComplete ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 35, scale: 0.96 }}
+          transition={{ duration: 1.05, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}>
           <div className="photo-glow" aria-hidden="true" />
           <div className="photo-orbit" aria-hidden="true" />
           <span className="hero-symbol code-symbol" aria-hidden="true">&lt;/&gt;</span>
           <span className="hero-symbol star-symbol" aria-hidden="true">✦</span>
-          <img src="/profile.png" alt="Aditya Nur Arif" fetchPriority="high" />
+          <div className="portrait-frame"><img src="/profile.png" alt="Aditya Nur Arif" fetchPriority="high" /></div>
         </motion.div>
 
-        <motion.div className="hero-description" initial="hidden" animate="visible" variants={fadeInUp}>
+        <motion.div className="hero-description" initial="hidden" animate={introComplete ? 'visible' : 'hidden'} variants={fadeInUp}>
           <p>Saya Aditya Nur Arif, fokus pada pengembangan web dan desain antarmuka. Saat ini sedang menempuh pendidikan di SMK Telkom Purwokerto dengan spesialisasi Rekayasa Perangkat Lunak.</p>
           <p className="hero-location"><i className="fa-solid fa-location-dot" aria-hidden="true" /> Banyumas, Jawa Tengah</p>
           <a href="#portfolio" className="blue-button subtle-button">
             <i className="fa-regular fa-folder-open" aria-hidden="true" /> View Projects
           </a>
         </motion.div>
+        <a className="scroll-cue" href="#about"><span className="scroll-mouse"><span /></span>Scroll to explore</a>
       </section>
 
       {/* ABOUT ME SECTION */}
@@ -358,6 +389,8 @@ export default function App() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
+                whileHover={reducedMotion ? undefined : { y: -8, scale: 1.01 }}
+                whileTap={reducedMotion ? undefined : { scale: 0.985 }}
                 onClick={() => setSelectedProject(project)}
                 role="button"
                 tabIndex={0}
@@ -495,9 +528,10 @@ export default function App() {
             className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.94, opacity: 0, y: reducedMotion ? 0 : 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.97, opacity: 0, y: reducedMotion ? 0 : 10 }}
+              transition={{ type: 'spring', stiffness: 310, damping: 28 }}
               role="dialog" aria-modal="true" aria-labelledby="project-dialog-title"
               onClick={(e) => e.stopPropagation()}
               className="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-6 sm:p-8 relative shadow-2xl max-h-[90vh] overflow-y-auto"
@@ -535,5 +569,6 @@ export default function App() {
       </AnimatePresence>
 
     </div>
+    </MotionConfig>
   );
 }
