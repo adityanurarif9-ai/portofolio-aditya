@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import { motion, AnimatePresence, MotionConfig, useReducedMotion, useScroll, useSpring } from 'framer-motion';
 import { AmbientScene, OpeningSequence, RotatingRole } from './components/MotionEffects';
+import { GhostCursor } from './components/ReferenceMotion';
 
 function ProjectImage({ project, className }) {
   const [failed, setFailed] = useState(false);
@@ -14,7 +15,7 @@ function ProjectImage({ project, className }) {
 export default function App() {
   const reducedMotion = useReducedMotion();
   const [introComplete, setIntroComplete] = useState(() =>
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches || Boolean(window.location.hash),
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches || (Boolean(window.location.hash) && window.location.hash !== '#home'),
   );
   const { scrollYProgress } = useScroll();
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 160, damping: 30 });
@@ -37,7 +38,7 @@ export default function App() {
       for (const section of sections) {
         const element = document.getElementById(section);
         if (element) {
-          const top = element.offsetTop;
+          const top = element.getBoundingClientRect().top + window.scrollY;
           const height = element.offsetHeight;
           if (scrollPosition >= top && scrollPosition < top + height) {
             setActiveSection(section);
@@ -95,9 +96,10 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-    <div className={'portfolio-site text-slate-100 font-sans min-h-screen selection:bg-blue-500 selection:text-white overflow-x-hidden relative ' + (introComplete ? 'is-ready' : 'is-opening')}>
+    <div className={'portfolio-site text-slate-100 font-sans min-h-screen selection:bg-blue-500 selection:text-white overflow-x-clip relative ' + (introComplete ? 'is-ready' : 'is-opening')}>
       <OpeningSequence complete={introComplete} />
-      <AmbientScene />
+      <AmbientScene reducedMotion={reducedMotion} />
+      <GhostCursor reducedMotion={reducedMotion} />
       <motion.div className="reading-progress" aria-hidden="true"
         style={{ scaleX: reducedMotion ? scrollYProgress : smoothProgress }} />
 
@@ -218,6 +220,7 @@ export default function App() {
         </div>
       </section>
 
+      <div className="career-layout">
       {/* EDUCATION SECTION */}
       <section id="education" className="py-20 relative z-10">
         <div className="max-w-4xl mx-auto px-6">
@@ -228,7 +231,7 @@ export default function App() {
 
           <motion.div
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-            className="bg-slate-900/50 border border-slate-800 rounded-xl p-6 sm:p-8 transition-all hover:border-slate-700"
+            className="timeline-entry"
           >
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 pb-4 border-b border-slate-800">
               <div>
@@ -245,6 +248,51 @@ export default function App() {
           </motion.div>
         </div>
       </section>
+
+      {/* EXPERIENCE SECTION */}
+      <section id="experience" className="py-24 bg-slate-950/40 relative z-10 border-t border-slate-900">
+        <div className="max-w-4xl mx-auto px-6">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="mb-12">
+            <h2 className="text-3xl font-bold text-white mb-3">Experience</h2>
+            <p className="text-slate-400 text-base">Organisasi dan kepemimpinan</p>
+          </motion.div>
+
+          <div className="space-y-4">
+            {[
+              {
+                title: "Wakil Ketua Majelis Perwakilan Kelas (MPK)",
+                inst: "SMK Telkom Purwokerto",
+                desc: "Mengoordinasikan pengawasan program kerja OSIS, menampung aspirasi siswa, dan menyusun agenda strategis sekolah."
+              },
+              {
+                title: "Brand Ambassador Sekolah",
+                inst: "SMK Telkom Purwokerto",
+                desc: "Mewakili institusi dalam public speaking, pembuatan konten promosi, dan presentasi sekolah."
+              },
+              {
+                title: "Anggota Paskibraka (Pastema) & Pramuka",
+                inst: "SMK Telkom Purwokerto",
+                desc: "Melatih kedisiplinan, kerja sama tim, dan kepemimpinan dalam kegiatan upacara resmi."
+              }
+            ].map((exp, idx) => (
+              <motion.div
+                key={exp.title}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: idx * 0.15 }}
+                className="timeline-entry"
+              >
+                <h3 className="text-lg font-bold text-white">{exp.title}</h3>
+                <p className="text-xs font-semibold text-cyan-400 uppercase mt-0.5 mb-2">{exp.inst}</p>
+                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{exp.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      </div>
 
     {/* SKILLS SECTION (MARQUEE ANIMATION & CLEAN LOGOS) */}
       <section id="skills" className="py-20 relative z-10 border-t border-slate-900 overflow-hidden">
@@ -426,49 +474,6 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* EXPERIENCE SECTION */}
-      <section id="experience" className="py-24 bg-slate-950/40 relative z-10 border-t border-slate-900">
-        <div className="max-w-4xl mx-auto px-6">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="mb-12">
-            <h2 className="text-3xl font-bold text-white mb-3">Experience</h2>
-            <p className="text-slate-400 text-base">Organisasi dan kepemimpinan</p>
-          </motion.div>
-
-          <div className="space-y-4">
-            {[
-              {
-                title: "Wakil Ketua Majelis Perwakilan Kelas (MPK)",
-                inst: "SMK Telkom Purwokerto",
-                desc: "Mengoordinasikan pengawasan program kerja OSIS, menampung aspirasi siswa, dan menyusun agenda strategis sekolah."
-              },
-              {
-                title: "Brand Ambassador Sekolah",
-                inst: "SMK Telkom Purwokerto",
-                desc: "Mewakili institusi dalam public speaking, pembuatan konten promosi, dan presentasi sekolah."
-              },
-              {
-                title: "Anggota Paskibraka (Pastema) & Pramuka",
-                inst: "SMK Telkom Purwokerto",
-                desc: "Melatih kedisiplinan, kerja sama tim, dan kepemimpinan dalam kegiatan upacara resmi."
-              }
-            ].map((exp, idx) => (
-              <motion.div
-                key={exp.title}
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.15 }}
-                className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-md hover:border-cyan-500/40 transition-all"
-              >
-                <h3 className="text-lg font-bold text-white">{exp.title}</h3>
-                <p className="text-xs font-semibold text-cyan-400 uppercase mt-0.5 mb-2">{exp.inst}</p>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{exp.desc}</p>
               </motion.div>
             ))}
           </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ContourBackdrop } from './ReferenceMotion';
 
 export function OpeningSequence({ complete }) {
   return (
@@ -23,9 +24,10 @@ export function OpeningSequence({ complete }) {
   );
 }
 
-export function AmbientScene() {
+export function AmbientScene({ reducedMotion }) {
   return (
     <div className="ambient-scene" aria-hidden="true">
+      {!reducedMotion && <ContourBackdrop />}
       <span className="ambient-orb orb-blue" />
       <span className="ambient-orb orb-violet" />
       <span className="ambient-orb orb-cyan" />
