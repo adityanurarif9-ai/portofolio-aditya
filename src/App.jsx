@@ -3,6 +3,7 @@ import './App.css';
 import { motion, AnimatePresence, MotionConfig, useReducedMotion, useScroll, useSpring } from 'framer-motion';
 import { AmbientScene, OpeningSequence, RotatingRole } from './components/MotionEffects';
 import { GhostCursor } from './components/ReferenceMotion';
+import SpiderPortrait from './components/SpiderPortrait';
 
 function ProjectImage({ project, className }) {
   const [failed, setFailed] = useState(false);
@@ -159,7 +160,7 @@ export default function App() {
           <div className="photo-orbit" aria-hidden="true" />
           <span className="hero-symbol code-symbol" aria-hidden="true">&lt;/&gt;</span>
           <span className="hero-symbol star-symbol" aria-hidden="true">✦</span>
-          <div className="portrait-frame"><img src="/profile.png" alt="Aditya Nur Arif" fetchPriority="high" /></div>
+          <SpiderPortrait />
         </motion.div>
 
         <motion.div className="hero-description" initial="hidden" animate={introComplete ? 'visible' : 'hidden'} variants={fadeInUp}>

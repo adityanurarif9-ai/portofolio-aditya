@@ -323,3 +323,53 @@
 @media (prefers-reduced-motion: reduce) {
   .portfolio-site { background-image: url('/contours.svg'); }
 }
+
+/* Face transformation shares the photo's cover crop and transform. */
+.spider-portrait { display: block; padding: 0; text-align: initial; cursor: pointer; }
+.spider-portrait .spider-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: scale(1.9);
+  transform-origin: 50% 59%;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(4px);
+  transition: opacity .18s ease, filter .3s ease;
+}
+.spider-portrait[data-spider="true"] .spider-overlay { opacity: 1; filter: blur(0); }
+.spider-portrait[data-spider="true"] { border-color: #ee505e; box-shadow: 0 0 0 8px #e3233210, 0 16px 60px #97152a33; }
+.spider-portrait img { pointer-events: none; }
+.spider-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(130deg, #f0444426, transparent 60%);
+  opacity: 0;
+  transition: opacity .4s;
+}
+.spider-portrait[data-spider="true"] .spider-flash { opacity: 1; }
+.portrait-hint {
+  position: absolute;
+  z-index: 3;
+  bottom: -34px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  color: #b2c4e8;
+  background: #0b1730e8;
+  border: 1px solid #31486e;
+  padding: 6px 11px;
+  border-radius: 30px;
+  font-size: 12px;
+  pointer-events: none;
+}
+@media (max-width: 540px) {
+  .portrait-hint { font-size: 11px; bottom: -33px; padding: 5px 8px; }
+  .hero-description { margin-top: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spider-portrait .spider-overlay, .spider-flash { transition: none; }
+}
