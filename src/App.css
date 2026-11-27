@@ -324,33 +324,21 @@
   .portfolio-site { background-image: url('/contours.svg'); }
 }
 
-/* Face transformation shares the photo's cover crop and transform. */
-.spider-portrait { display: block; padding: 0; text-align: initial; cursor: pointer; }
-.spider-portrait .spider-overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transform: scale(1.9);
-  transform-origin: 50% 59%;
-  pointer-events: none;
-  opacity: 0;
-  filter: blur(4px);
-  transition: opacity .18s ease, filter .3s ease;
-}
-.spider-portrait[data-spider="true"] .spider-overlay { opacity: 1; filter: blur(0); }
-.spider-portrait[data-spider="true"] { border-color: #ee505e; box-shadow: 0 0 0 8px #e3233210, 0 16px 60px #97152a33; }
+/* Cursor-following costume reveal, aligned to the original photo. */
+.spider-portrait { display: block; padding: 0; text-align: initial; cursor: crosshair; touch-action: pan-y; }
 .spider-portrait img { pointer-events: none; }
-.spider-flash {
+.spider-reveal-layer {
   position: absolute;
+  z-index: 1;
   inset: 0;
+  display: block;
   pointer-events: none;
-  border-radius: inherit;
-  background: linear-gradient(130deg, #f0444426, transparent 60%);
   opacity: 0;
-  transition: opacity .4s;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  transition: opacity .22s ease;
 }
-.spider-portrait[data-spider="true"] .spider-flash { opacity: 1; }
+.spider-portrait[data-spider="true"] .spider-reveal-layer { opacity: 1; }
 .portrait-hint {
   position: absolute;
   z-index: 3;
@@ -370,6 +358,4 @@
   .portrait-hint { font-size: 11px; bottom: -33px; padding: 5px 8px; }
   .hero-description { margin-top: 17px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .spider-portrait .spider-overlay, .spider-flash { transition: none; }
-}
+@media (prefers-reduced-motion: reduce) { .spider-reveal-layer { transition: none; } }
