@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
-export function GhostCursor({ reducedMotion }) {
+export function CursorRing({ reducedMotion }) {
   const [visible, setVisible] = useState(false);
   const targetX = useMotionValue(-100);
   const targetY = useMotionValue(-100);
@@ -18,9 +18,9 @@ export function GhostCursor({ reducedMotion }) {
         setVisible(false);
         return;
       }
-      targetX.set(event.clientX + 14);
-      targetY.set(event.clientY + 14);
-      targetScale.set(event.target.closest('a, button, [role="button"]') ? 1.2 : 1);
+      targetX.set(event.clientX - 15);
+      targetY.set(event.clientY - 15);
+      targetScale.set(event.target.closest('a, button, [role="button"]') ? 1.5 : 1);
       setVisible(true);
     };
     const hide = () => setVisible(false);
@@ -42,10 +42,9 @@ export function GhostCursor({ reducedMotion }) {
 
   if (reducedMotion) return null;
   return (
-    <motion.div className="ghost-cursor" aria-hidden="true" style={{ x, y, scale }}
+    <motion.div className="cursor-ring" aria-hidden="true" style={{ x, y, scale }}
       animate={{ opacity: visible ? 1 : 0 }} transition={{ duration: 0.18 }}>
-      <span className="ghost-cursor-glow" />
-      <span className="ghost-character">👻</span>
+      <span className="cursor-ring-center" />
     </motion.div>
   );
 }

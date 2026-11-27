@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import { motion, AnimatePresence, MotionConfig, useReducedMotion, useScroll, useSpring } from 'framer-motion';
 import { AmbientScene, OpeningSequence, RotatingRole } from './components/MotionEffects';
-import { GhostCursor } from './components/ReferenceMotion';
+import { CursorRing } from './components/ReferenceMotion';
 import SpiderPortrait from './components/SpiderPortrait';
 
 function ProjectImage({ project, className }) {
@@ -100,7 +100,7 @@ export default function App() {
     <div className={'portfolio-site text-slate-100 font-sans min-h-screen selection:bg-blue-500 selection:text-white overflow-x-clip relative ' + (introComplete ? 'is-ready' : 'is-opening')}>
       <OpeningSequence complete={introComplete} />
       <AmbientScene reducedMotion={reducedMotion} />
-      <GhostCursor reducedMotion={reducedMotion} />
+      <CursorRing reducedMotion={reducedMotion} />
       <motion.div className="reading-progress" aria-hidden="true"
         style={{ scaleX: reducedMotion ? scrollYProgress : smoothProgress }} />
 
